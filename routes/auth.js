@@ -58,5 +58,33 @@ authRouter.post('/login', async (req, res) => {
       res.status(500).json({ message: "Internal server error", isOk:false });
     }
   });
+  authRouter.get("/verify", async (req, res) => {
+    try {
+      const token = req.header("Authorization").split(" ")[1];
+      const decoded = jwt.verify(token, process.env.secret_key);
+      const user = await User.findOne({ _id: decoded.userId });
+  
+      if (!token || !decoded) {
+        return res
+          .status(401)
+          .json({ message: "Not Verified", Is_verified: false, isOk: false });
+      }
+      if (!user) {
+        return res
+          .status(401)
+          .json({ message: "Not Verified", Is_verified: false, isOk: false });
+          
+      }
+      return res.status(200).json({message:"Verified",Is_verified: true, isOk: true })
+    } catch (error) {
+      res
+        .status(401)
+        .json({
+          message: "Authentication failed",
+          Is_verified: false,
+          isOk: false,
+        });
+    }
+  });
 
 module.exports = {authRouter};
